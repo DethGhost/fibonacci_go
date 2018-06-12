@@ -34,20 +34,22 @@ func fibonacci() func() int {
 func gameFlow() {
 
 	fImput, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	fImput = strings.TrimRight(fImput, "\r\n")
+	fImput = strings.TrimRight(fImput, "\n")
 	userError := 0
 	userOk := 0
 
-	if strings.TrimRight(fImput, "\r\n") == "exit" {
+	if strings.TrimRight(fImput, "\n") == "exit" {
 		fmt.Println("bye")
 		os.Exit(1)
-	} else if strings.TrimRight(fImput, "\r\n") == "start" {
+	} else if strings.TrimRight(fImput, "\n") == "start" {
 		fmt.Println("Yuor game is begining, enter first fibonacci number")
 		Fibonacci := fibonacci()
 		position := 0
+		input := make(chan string, 1)
+		go getInput(input)
 		for {
 			position++
-			a := game(userError, userOk, position, Fibonacci())
+			a := game(userError, userOk, position, Fibonacci(), input)
 			userError = a[1]
 			userOk = a[0]
 			if userOk == 10 {
@@ -68,15 +70,11 @@ break
 	gameFlow()
 }
 
-func game(userError int, userOk int, position int, currentNum int) []int {
+func game(userError int, userOk int, position int, currentNum int, input chan string) []int {
 
-	input := make(chan string, 1)
-	go getInput(input)
-	fmt.Println(currentNum)
 	select {
 	case res := <-input:
 		enteredNum, _ := strconv.Atoi(res);
-		fmt.Println(enteredNum)
 		if currentNum != enteredNum {
 			userError++
 			fmt.Println("You have enter wrong number")
@@ -85,6 +83,7 @@ func game(userError int, userOk int, position int, currentNum int) []int {
 		} else {
 			userOk++
 		}
+
 		break
 	case <-time.After(10 * time.Second):
 		userError++
@@ -93,6 +92,7 @@ func game(userError int, userOk int, position int, currentNum int) []int {
 		fmt.Printf("You have %d tries\n", 3-userError)
 		break
 	}
+
 	return []int{userOk, userError}
 }
 
