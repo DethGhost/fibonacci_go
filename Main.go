@@ -83,7 +83,6 @@ func game(userError int, userOk int, position int, currentNum int, input chan st
 		} else {
 			userOk++
 		}
-
 		break
 	case <-time.After(10 * time.Second):
 		userError++
